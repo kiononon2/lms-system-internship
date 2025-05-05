@@ -31,6 +31,21 @@ func main() {
 		s.Close()
 	}()
 
+	//repository := repo.NewRepository(db)
+	//
+	//services := service.NewService(repository)
+	//
+	////course := entities.Course{
+	////	ID:          0,
+	////	Name:        "Example Course",
+	////	Description: "example course",
+	////	CreatedAt:   time.Time{},
+	////	UpdatedAt:   time.Time{},
+	////	Chapters:    nil,
+	////}
+	//
+	//services.CourseService.DeleteCourse(context.Background(), 1)
+
 	server := &http.Server{
 		Addr: ":3030",
 	}
