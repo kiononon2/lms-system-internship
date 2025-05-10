@@ -8,9 +8,9 @@ import (
 	"lms-system-internship/storage"
 )
 
-type GormRepository struct {
-	db *gorm.DB
-}
+//type GormRepository struct {
+//	db *gorm.DB
+//}
 
 func NewRepository(db *gorm.DB) *storage.Repository {
 	return &storage.Repository{

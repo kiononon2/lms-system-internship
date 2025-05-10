@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
+	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"lms-system-internship/entities"
+	"lms-system-internship/router"
 	"log"
-	"net/http"
 )
 
 var db *gorm.DB
@@ -31,26 +33,9 @@ func main() {
 		s.Close()
 	}()
 
-	//repository := repo.NewRepository(db)
-	//
-	//services := service.NewService(repository)
-	//
-	////course := entities.Course{
-	////	ID:          0,
-	////	Name:        "Example Course",
-	////	Description: "example course",
-	////	CreatedAt:   time.Time{},
-	////	UpdatedAt:   time.Time{},
-	////	Chapters:    nil,
-	////}
-	//
-	//services.CourseService.DeleteCourse(context.Background(), 1)
-
-	server := &http.Server{
-		Addr: ":3030",
-	}
-	err := server.ListenAndServe()
-	if err != nil {
-		log.Fatal(err)
+	r := gin.Default()
+	router.SetupRoutes(db, r)
+	if err := r.Run(":3030"); err != nil {
+		fmt.Printf("Error starting server: %v\n", err)
 	}
 }
