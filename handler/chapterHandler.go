@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"fmt"
 	"lms-system-internship/entities"
+	"lms-system-internship/pkg"
 	"lms-system-internship/service"
 	"net/http"
 	"strconv"
@@ -17,79 +19,86 @@ func NewChapterHandler(svc service.ChapterService) *ChapterHandler {
 	return &ChapterHandler{svc: svc}
 }
 
-func (h *ChapterHandler) CreateChapter(c *gin.Context) {
-	courseID, err := strconv.ParseUint(c.Query("course_id"), 10, 64)
+func (h *ChapterHandler) GetAllChapters(c *gin.Context) {
+	chapters, err := h.svc.GetAllChapters(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course ID"})
+		c.Error(err)
 		return
 	}
-
-	var chapter entities.Chapter
-	if err := c.ShouldBindJSON(&chapter); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
-
-	err = h.svc.AddChapterToCourse(c.Request.Context(), uint(courseID), &chapter)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create chapter"})
-		return
-	}
-
-	c.JSON(http.StatusCreated, chapter)
+	c.JSON(http.StatusOK, chapters)
 }
 
-func (h *ChapterHandler) GetChapterWithLessons(c *gin.Context) {
+func (h *ChapterHandler) GetChapter(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("chapter_id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid chapter ID"})
+		c.Error(pkg.ErrInvalidInput)
 		return
 	}
 
 	chapter, err := h.svc.GetChapter(c.Request.Context(), uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Chapter not found"})
+		c.Error(pkg.ErrChapterNotFound)
 		return
 	}
-
 	c.JSON(http.StatusOK, chapter)
 }
 
-func (h *ChapterHandler) UpdateChapter(c *gin.Context) {
+func (h *ChapterHandler) CreateChapter(c *gin.Context) {
+	courseID, err := strconv.ParseUint(c.Query("course_id"), 10, 64)
+	if err != nil {
+		fmt.Println(err)
+		c.Error(pkg.ErrInvalidInput)
+		return
+	}
+
+	var chapter entities.Chapter
+	if err2 := c.ShouldBindJSON(&chapter); err2 != nil {
+		fmt.Println(err2)
+		c.Error(pkg.ErrInvalidInput)
+		return
+	}
+
+	if err3 := h.svc.AddChapterToCourse(c.Request.Context(), uint(courseID), &chapter); err3 != nil {
+		fmt.Println(err3)
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusCreated, chapter)
+}
+
+func (h *ChapterHandler) UpdateChapterOrder(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("chapter_id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid chapter ID"})
+		c.Error(pkg.ErrInvalidInput)
 		return
 	}
 
-	var body struct {
+	var payload struct {
 		Order int `json:"order"`
 	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+	if err2 := c.ShouldBindJSON(&payload); err2 != nil {
+		c.Error(pkg.ErrInvalidInput)
 		return
 	}
 
-	err = h.svc.UpdateChapterOrder(c.Request.Context(), uint(id), body.Order)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update chapter"})
+	if err3 := h.svc.UpdateChapterOrder(c.Request.Context(), uint(id), payload.Order); err3 != nil {
+		c.Error(pkg.ErrChapterNotFound)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "chapter updated"})
+	c.Status(http.StatusOK)
 }
 
 func (h *ChapterHandler) DeleteChapter(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("chapter_id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid chapter ID"})
+		c.Error(pkg.ErrInvalidInput)
 		return
 	}
 
-	if err := h.svc.RemoveChapter(c.Request.Context(), uint(id)); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Chapter not found or deletion failed"})
+	if err2 := h.svc.RemoveChapter(c.Request.Context(), uint(id)); err2 != nil {
+		c.Error(pkg.ErrChapterNotFound)
 		return
 	}
-
 	c.Status(http.StatusNoContent)
 }

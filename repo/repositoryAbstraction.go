@@ -1,4 +1,4 @@
-package repository
+package repo
 
 import (
 	"context"
@@ -19,6 +19,7 @@ type CourseRepository interface {
 }
 
 type ChapterRepository interface {
+	FindAll(ctx context.Context) ([]*entities.Chapter, error)
 	FindByCourseID(ctx context.Context, courseID uint) ([]*entities.Chapter, error)
 	FindByID(ctx context.Context, id uint) (*entities.Chapter, error)
 	Save(ctx context.Context, chapter *entities.Chapter) error
@@ -27,6 +28,7 @@ type ChapterRepository interface {
 }
 
 type LessonRepository interface {
+	FindAll(ctx context.Context) ([]*entities.Lesson, error)
 	FindByChapterID(ctx context.Context, chapterID uint) ([]*entities.Lesson, error)
 	FindByID(ctx context.Context, id uint) (*entities.Lesson, error)
 	Save(ctx context.Context, lesson *entities.Lesson) error

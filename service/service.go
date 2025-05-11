@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 	"lms-system-internship/entities"
-	"lms-system-internship/repository"
+	"lms-system-internship/repo"
 )
 
-func NewService(repo *repository.Repository) *Service {
+func NewService(repo *repo.Repository) *Service {
 	return &Service{
 		CourseService:  NewCourseService(repo.Course),
 		ChapterService: NewChapterService(repo.Chapter),
@@ -16,10 +16,10 @@ func NewService(repo *repository.Repository) *Service {
 
 // Course Service Implementation
 type courseService struct {
-	repo repository.CourseRepository
+	repo repo.CourseRepository
 }
 
-func NewCourseService(repo repository.CourseRepository) CourseService {
+func NewCourseService(repo repo.CourseRepository) CourseService {
 	return &courseService{repo: repo}
 }
 
@@ -45,11 +45,15 @@ func (s *courseService) DeleteCourse(ctx context.Context, courseID uint) error {
 
 // Chapter Service Implementation
 type chapterService struct {
-	repo repository.ChapterRepository
+	repo repo.ChapterRepository
 }
 
-func NewChapterService(repo repository.ChapterRepository) ChapterService {
+func NewChapterService(repo repo.ChapterRepository) ChapterService {
 	return &chapterService{repo: repo}
+}
+
+func (s *chapterService) GetAllChapters(ctx context.Context) ([]*entities.Chapter, error) {
+	return s.repo.FindAll(ctx)
 }
 
 func (s *chapterService) GetChapter(ctx context.Context, chapterID uint) (*entities.Chapter, error) {
@@ -76,11 +80,15 @@ func (s *chapterService) RemoveChapter(ctx context.Context, chapterID uint) erro
 
 // Lesson Service Implementation
 type lessonService struct {
-	repo repository.LessonRepository
+	repo repo.LessonRepository
 }
 
-func NewLessonService(repo repository.LessonRepository) LessonService {
+func NewLessonService(repo repo.LessonRepository) LessonService {
 	return &lessonService{repo: repo}
+}
+
+func (s *lessonService) GetAllLessons(ctx context.Context) ([]*entities.Lesson, error) {
+	return s.repo.FindAll(ctx)
 }
 
 func (s *lessonService) GetLesson(ctx context.Context, lessonID uint) (*entities.Lesson, error) {

@@ -6,6 +6,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"lms-system-internship/entities"
+	"lms-system-internship/middleware"
 	"lms-system-internship/router"
 	"log"
 )
@@ -34,6 +35,8 @@ func main() {
 	}()
 
 	r := gin.Default()
+	r.Use(middleware.ErrorHandler())
+
 	router.SetupRoutes(db, r)
 	if err := r.Run(":3030"); err != nil {
 		fmt.Printf("Error starting server: %v\n", err)

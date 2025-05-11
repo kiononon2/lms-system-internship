@@ -2,6 +2,7 @@ package handler
 
 import (
 	"lms-system-internship/entities"
+	"lms-system-internship/pkg"
 	"lms-system-internship/service"
 	"net/http"
 	"strconv"
@@ -17,79 +18,102 @@ func NewLessonHandler(svc service.LessonService) *LessonHandler {
 	return &LessonHandler{svc: svc}
 }
 
-func (h *LessonHandler) CreateLesson(c *gin.Context) {
-	chapterID, err := strconv.ParseUint(c.Query("chapter_id"), 10, 64)
+func (h *LessonHandler) GetAllLessons(c *gin.Context) {
+	lessons, err := h.svc.GetAllLessons(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid chapter ID"})
+		c.Error(err)
 		return
 	}
-
-	var lesson entities.Lesson
-	if err := c.ShouldBindJSON(&lesson); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
-
-	err = h.svc.AddLessonToChapter(c.Request.Context(), uint(chapterID), &lesson)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create lesson"})
-		return
-	}
-
-	c.JSON(http.StatusCreated, lesson)
+	c.JSON(http.StatusOK, lessons)
 }
 
-func (h *LessonHandler) GetLessonByID(c *gin.Context) {
+func (h *LessonHandler) GetLesson(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("lesson_id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid lesson ID"})
+		c.Error(pkg.ErrInvalidInput)
 		return
 	}
 
 	lesson, err := h.svc.GetLesson(c.Request.Context(), uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Lesson not found"})
+		c.Error(pkg.ErrLessonNotFound)
 		return
 	}
-
 	c.JSON(http.StatusOK, lesson)
 }
 
-func (h *LessonHandler) UpdateLesson(c *gin.Context) {
+func (h *LessonHandler) CreateLesson(c *gin.Context) {
+	chapterID, err := strconv.ParseUint(c.Query("chapter_id"), 10, 64)
+	if err != nil {
+		c.Error(pkg.ErrInvalidInput)
+		return
+	}
+
+	var lesson entities.Lesson
+	if err := c.ShouldBindJSON(&lesson); err != nil {
+		c.Error(pkg.ErrInvalidInput)
+		return
+	}
+
+	if err := h.svc.AddLessonToChapter(c.Request.Context(), uint(chapterID), &lesson); err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusCreated, lesson)
+}
+
+func (h *LessonHandler) UpdateLessonContent(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("lesson_id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid lesson ID"})
+		c.Error(pkg.ErrInvalidInput)
 		return
 	}
 
-	var body struct {
+	var payload struct {
 		Content string `json:"content"`
 	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.Error(pkg.ErrInvalidInput)
 		return
 	}
 
-	err = h.svc.UpdateLessonContent(c.Request.Context(), uint(id), body.Content)
+	if err := h.svc.UpdateLessonContent(c.Request.Context(), uint(id), payload.Content); err != nil {
+		c.Error(pkg.ErrLessonNotFound)
+		return
+	}
+	c.Status(http.StatusOK)
+}
+
+func (h *LessonHandler) ReorderLessons(c *gin.Context) {
+	chapterID, err := strconv.ParseUint(c.Param("chapter_id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update lesson"})
+		c.Error(pkg.ErrInvalidInput)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "lesson updated"})
+	var ids []uint
+	if err := c.ShouldBindJSON(&ids); err != nil {
+		c.Error(pkg.ErrInvalidInput)
+		return
+	}
+
+	if err := h.svc.ReorderLessons(c.Request.Context(), uint(chapterID), ids); err != nil {
+		c.Error(err)
+		return
+	}
+	c.Status(http.StatusOK)
 }
 
 func (h *LessonHandler) DeleteLesson(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("lesson_id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid lesson ID"})
+		c.Error(pkg.ErrInvalidInput)
 		return
 	}
 
 	if err := h.svc.DeleteLesson(c.Request.Context(), uint(id)); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Lesson not found or deletion failed"})
+		c.Error(pkg.ErrLessonNotFound)
 		return
 	}
-
 	c.Status(http.StatusNoContent)
 }

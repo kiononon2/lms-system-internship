@@ -14,6 +14,7 @@ type CourseService interface {
 }
 
 type ChapterService interface {
+	GetAllChapters(ctx context.Context) ([]*entities.Chapter, error)
 	GetChapter(ctx context.Context, chapterID uint) (*entities.Chapter, error)
 	AddChapterToCourse(ctx context.Context, courseID uint, chapter *entities.Chapter) error
 	UpdateChapterOrder(ctx context.Context, chapterID uint, newOrder int) error
@@ -21,6 +22,7 @@ type ChapterService interface {
 }
 
 type LessonService interface {
+	GetAllLessons(ctx context.Context) ([]*entities.Lesson, error)
 	GetLesson(ctx context.Context, lessonID uint) (*entities.Lesson, error)
 	AddLessonToChapter(ctx context.Context, chapterID uint, lesson *entities.Lesson) error
 	UpdateLessonContent(ctx context.Context, lessonID uint, content string) error

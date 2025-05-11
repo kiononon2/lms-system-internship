@@ -1,4 +1,4 @@
-package repository
+package repo
 
 import (
 	"context"
@@ -6,10 +6,6 @@ import (
 	"gorm.io/gorm"
 	"lms-system-internship/entities"
 )
-
-//type GormRepository struct {
-//	db *gorm.DB
-//}
 
 func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{
@@ -26,13 +22,13 @@ type courseRepository struct {
 
 func (r *courseRepository) FindAll(ctx context.Context) ([]*entities.Course, error) {
 	var courses []*entities.Course
-	err := r.db.WithContext(ctx).Find(&courses).Error
+	err := r.db.Preload("Chapters.Lessons").WithContext(ctx).Find(&courses).Error
 	return courses, err
 }
 
 func (r *courseRepository) FindByID(ctx context.Context, id uint) (*entities.Course, error) {
 	var course entities.Course
-	err := r.db.WithContext(ctx).First(&course, id).Error
+	err := r.db.Preload("Chapters.Lessons").WithContext(ctx).First(&course, id).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, ErrNotFound
 	}
@@ -63,15 +59,21 @@ type chapterRepository struct {
 	db *gorm.DB
 }
 
+func (r *chapterRepository) FindAll(ctx context.Context) ([]*entities.Chapter, error) {
+	var chapters []*entities.Chapter
+	err := r.db.Preload("Lessons").WithContext(ctx).Find(&chapters).Error
+	return chapters, err
+}
+
 func (r *chapterRepository) FindByCourseID(ctx context.Context, courseID uint) ([]*entities.Chapter, error) {
 	var chapters []*entities.Chapter
-	err := r.db.WithContext(ctx).Where("course_id = ?", courseID).Order("\"order\"").Find(&chapters).Error
+	err := r.db.Preload("Lessons").WithContext(ctx).Where("course_id = ?", courseID).Order("\"order\"").Find(&chapters).Error
 	return chapters, err
 }
 
 func (r *chapterRepository) FindByID(ctx context.Context, id uint) (*entities.Chapter, error) {
 	var chapter entities.Chapter
-	err := r.db.WithContext(ctx).First(&chapter, id).Error
+	err := r.db.Preload("Lessons").WithContext(ctx).First(&chapter, id).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, ErrNotFound
 	}
@@ -100,6 +102,12 @@ func (r *chapterRepository) Delete(ctx context.Context, id uint) error {
 // Lesson Repository
 type lessonRepository struct {
 	db *gorm.DB
+}
+
+func (r *lessonRepository) FindAll(ctx context.Context) ([]*entities.Lesson, error) {
+	var lessons []*entities.Lesson
+	err := r.db.WithContext(ctx).Find(&lessons).Error
+	return lessons, err
 }
 
 func (r *lessonRepository) FindByChapterID(ctx context.Context, chapterID uint) ([]*entities.Lesson, error) {
