@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 	"lms-system-internship/entities"
-	"lms-system-internship/storage"
+	"lms-system-internship/repository"
 )
 
-func NewService(repo *storage.Repository) *Service {
+func NewService(repo *repository.Repository) *Service {
 	return &Service{
 		CourseService:  NewCourseService(repo.Course),
 		ChapterService: NewChapterService(repo.Chapter),
@@ -16,10 +16,10 @@ func NewService(repo *storage.Repository) *Service {
 
 // Course Service Implementation
 type courseService struct {
-	repo storage.CourseRepository
+	repo repository.CourseRepository
 }
 
-func NewCourseService(repo storage.CourseRepository) CourseService {
+func NewCourseService(repo repository.CourseRepository) CourseService {
 	return &courseService{repo: repo}
 }
 
@@ -45,10 +45,10 @@ func (s *courseService) DeleteCourse(ctx context.Context, courseID uint) error {
 
 // Chapter Service Implementation
 type chapterService struct {
-	repo storage.ChapterRepository
+	repo repository.ChapterRepository
 }
 
-func NewChapterService(repo storage.ChapterRepository) ChapterService {
+func NewChapterService(repo repository.ChapterRepository) ChapterService {
 	return &chapterService{repo: repo}
 }
 
@@ -76,10 +76,10 @@ func (s *chapterService) RemoveChapter(ctx context.Context, chapterID uint) erro
 
 // Lesson Service Implementation
 type lessonService struct {
-	repo storage.LessonRepository
+	repo repository.LessonRepository
 }
 
-func NewLessonService(repo storage.LessonRepository) LessonService {
+func NewLessonService(repo repository.LessonRepository) LessonService {
 	return &lessonService{repo: repo}
 }
 

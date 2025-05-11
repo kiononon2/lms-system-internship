@@ -1,19 +1,18 @@
-package repo
+package repository
 
 import (
 	"context"
 	"errors"
 	"gorm.io/gorm"
 	"lms-system-internship/entities"
-	"lms-system-internship/storage"
 )
 
 //type GormRepository struct {
 //	db *gorm.DB
 //}
 
-func NewRepository(db *gorm.DB) *storage.Repository {
-	return &storage.Repository{
+func NewRepository(db *gorm.DB) *Repository {
+	return &Repository{
 		Course:  &courseRepository{db: db},
 		Chapter: &chapterRepository{db: db},
 		Lesson:  &lessonRepository{db: db},
@@ -35,7 +34,7 @@ func (r *courseRepository) FindByID(ctx context.Context, id uint) (*entities.Cou
 	var course entities.Course
 	err := r.db.WithContext(ctx).First(&course, id).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, storage.ErrNotFound
+		return nil, ErrNotFound
 	}
 	return &course, err
 }
@@ -54,7 +53,7 @@ func (r *courseRepository) Delete(ctx context.Context, id uint) error {
 		return result.Error
 	}
 	if result.RowsAffected == 0 {
-		return storage.ErrNotFound
+		return ErrNotFound
 	}
 	return nil
 }
@@ -74,7 +73,7 @@ func (r *chapterRepository) FindByID(ctx context.Context, id uint) (*entities.Ch
 	var chapter entities.Chapter
 	err := r.db.WithContext(ctx).First(&chapter, id).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, storage.ErrNotFound
+		return nil, ErrNotFound
 	}
 	return &chapter, err
 }
@@ -93,7 +92,7 @@ func (r *chapterRepository) Delete(ctx context.Context, id uint) error {
 		return result.Error
 	}
 	if result.RowsAffected == 0 {
-		return storage.ErrNotFound
+		return ErrNotFound
 	}
 	return nil
 }
@@ -113,7 +112,7 @@ func (r *lessonRepository) FindByID(ctx context.Context, id uint) (*entities.Les
 	var lesson entities.Lesson
 	err := r.db.WithContext(ctx).First(&lesson, id).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, storage.ErrNotFound
+		return nil, ErrNotFound
 	}
 	return &lesson, err
 }
@@ -132,7 +131,7 @@ func (r *lessonRepository) Delete(ctx context.Context, id uint) error {
 		return result.Error
 	}
 	if result.RowsAffected == 0 {
-		return storage.ErrNotFound
+		return ErrNotFound
 	}
 	return nil
 }

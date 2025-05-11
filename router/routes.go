@@ -2,8 +2,8 @@ package router
 
 import (
 	"lms-system-internship/handler"
+	"lms-system-internship/repository"
 	"lms-system-internship/service"
-	"lms-system-internship/storage/repo"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +12,7 @@ import (
 
 func SetupRoutes(db *gorm.DB, r *gin.Engine) {
 	// Repositories
-	repo := repo.NewRepository(db)
+	repo := repository.NewRepository(db)
 
 	// Services
 	svc := service.NewService(repo)
