@@ -18,6 +18,14 @@ func NewChapterHandler(svc service.ChapterService) *ChapterHandler {
 	return &ChapterHandler{svc: svc}
 }
 
+// GetAllChapters godoc
+// @Summary      Get all chapters
+// @Description  Retrieves a list of all chapters
+// @Tags         chapters
+// @Produce      json
+// @Success      200  {array}   entities.Chapter
+// @Failure      500  {object}  pkg.ErrorResponse
+// @Router       /api/chapters [get]
 func (h *ChapterHandler) GetAllChapters(c *gin.Context) {
 	chapters, err := h.svc.GetAllChapters(c.Request.Context())
 	if err != nil {
@@ -29,6 +37,16 @@ func (h *ChapterHandler) GetAllChapters(c *gin.Context) {
 	c.JSON(http.StatusOK, chapters)
 }
 
+// GetChapter godoc
+// @Summary      Get chapter by ID
+// @Description  Retrieves a specific chapter by its ID
+// @Tags         chapters
+// @Produce      json
+// @Param        chapter_id  path      int  true  "Chapter ID"
+// @Success      200  {object}  entities.Chapter
+// @Failure      400  {object}  pkg.ErrorResponse
+// @Failure      404  {object}  pkg.ErrorResponse
+// @Router       /api/chapters/{chapter_id} [get]
 func (h *ChapterHandler) GetChapter(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("chapter_id"), 10, 64)
 	if err != nil {
@@ -47,6 +65,18 @@ func (h *ChapterHandler) GetChapter(c *gin.Context) {
 	c.JSON(http.StatusOK, chapter)
 }
 
+// CreateChapter godoc
+// @Summary      Create a new chapter
+// @Description  Adds a new chapter to a specific course
+// @Tags         chapters
+// @Accept       json
+// @Produce      json
+// @Param        course_id  query     int               true  "Course ID"
+// @Param        chapter    body      entities.Chapter  true  "Chapter data"
+// @Success      201  {object}  entities.Chapter
+// @Failure      400  {object}  pkg.ErrorResponse
+// @Failure      500  {object}  pkg.ErrorResponse
+// @Router       /api/chapters [post]
 func (h *ChapterHandler) CreateChapter(c *gin.Context) {
 	courseID, err := strconv.ParseUint(c.Query("course_id"), 10, 64)
 	if err != nil {
@@ -74,6 +104,18 @@ func (h *ChapterHandler) CreateChapter(c *gin.Context) {
 	c.JSON(http.StatusCreated, chapter)
 }
 
+// UpdateChapterOrder godoc
+// @Summary      Update chapter order
+// @Description  Updates the order field of a specific chapter
+// @Tags         chapters
+// @Accept       json
+// @Produce      json
+// @Param        chapter_id  path      int  true  "Chapter ID"
+// @Param        order       body      map[string]int  true  "New order value, e.g. {\"order\": 2}"
+// @Success      200
+// @Failure      400  {object}  pkg.ErrorResponse
+// @Failure      404  {object}  pkg.ErrorResponse
+// @Router       /api/chapters/{chapter_id}/order [put]
 func (h *ChapterHandler) UpdateChapterOrder(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("chapter_id"), 10, 64)
 	if err != nil {
@@ -105,6 +147,16 @@ func (h *ChapterHandler) UpdateChapterOrder(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// DeleteChapter godoc
+// @Summary      Delete a chapter
+// @Description  Deletes a specific chapter by its ID
+// @Tags         chapters
+// @Produce      json
+// @Param        chapter_id  path      int  true  "Chapter ID"
+// @Success      204
+// @Failure      400  {object}  pkg.ErrorResponse
+// @Failure      404  {object}  pkg.ErrorResponse
+// @Router       /api/chapters/{chapter_id} [delete]
 func (h *ChapterHandler) DeleteChapter(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("chapter_id"), 10, 64)
 	if err != nil {

@@ -19,6 +19,14 @@ func NewCourseHandler(svc service.CourseService) *CourseHandler {
 	return &CourseHandler{svc: svc}
 }
 
+// GetAllCourses godoc
+// @Summary      Get all courses
+// @Description  Retrieves a list of all courses
+// @Tags         courses
+// @Produce      json
+// @Success      200  {array}   entities.Course
+// @Failure      500  {object}  pkg.ErrorResponse
+// @Router       /api/courses [get]
 func (h *CourseHandler) GetAllCourses(c *gin.Context) {
 	courses, err := h.svc.GetAllCourses(c.Request.Context())
 	if err != nil {
@@ -30,6 +38,16 @@ func (h *CourseHandler) GetAllCourses(c *gin.Context) {
 	c.JSON(http.StatusOK, courses)
 }
 
+// GetCourse godoc
+// @Summary      Get a course by ID
+// @Description  Retrieves details of a course by its ID
+// @Tags         courses
+// @Produce      json
+// @Param        course_id  path      int  true  "Course ID"
+// @Success      200        {object}  entities.Course
+// @Failure      400        {object}  pkg.ErrorResponse
+// @Failure      404        {object}  pkg.ErrorResponse
+// @Router       /api/courses/{course_id} [get]
 func (h *CourseHandler) GetCourse(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("course_id"), 10, 64)
 	if err != nil {
@@ -48,6 +66,17 @@ func (h *CourseHandler) GetCourse(c *gin.Context) {
 	c.JSON(http.StatusOK, course)
 }
 
+// CreateCourse godoc
+// @Summary      Create a new course
+// @Description  Adds a new course to the system
+// @Tags         courses
+// @Accept       json
+// @Produce      json
+// @Param        course  body      entities.Course  true  "Course data"
+// @Success      201     {object}  entities.Course
+// @Failure      400     {object}  pkg.ErrorResponse
+// @Failure      500     {object}  pkg.ErrorResponse
+// @Router       /api/courses [post]
 func (h *CourseHandler) CreateCourse(c *gin.Context) {
 	var course entities.Course
 	if err := c.ShouldBindJSON(&course); err != nil {
@@ -70,6 +99,18 @@ func (h *CourseHandler) CreateCourse(c *gin.Context) {
 	c.JSON(http.StatusCreated, course)
 }
 
+// UpdateCourse godoc
+// @Summary      Update a course
+// @Description  Updates course details by ID
+// @Tags         courses
+// @Accept       json
+// @Produce      json
+// @Param        course_id  path      int              true  "Course ID"
+// @Param        course     body      entities.Course  true  "Updated course"
+// @Success      200        {object}  entities.Course
+// @Failure      400        {object}  pkg.ErrorResponse
+// @Failure      404        {object}  pkg.ErrorResponse
+// @Router       /api/courses/{course_id} [put]
 func (h *CourseHandler) UpdateCourse(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("course_id"), 10, 64)
 	if err != nil {
@@ -95,6 +136,15 @@ func (h *CourseHandler) UpdateCourse(c *gin.Context) {
 	c.JSON(http.StatusOK, course)
 }
 
+// DeleteCourse godoc
+// @Summary      Delete a course
+// @Description  Deletes a course by its ID
+// @Tags         courses
+// @Param        course_id  path  int  true  "Course ID"
+// @Success      204
+// @Failure      400  {object}  pkg.ErrorResponse
+// @Failure      404  {object}  pkg.ErrorResponse
+// @Router       /api/courses/{course_id} [delete]
 func (h *CourseHandler) DeleteCourse(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("course_id"), 10, 64)
 	if err != nil {

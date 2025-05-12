@@ -1,0 +1,516 @@
+basePath: /api
+definitions:
+  entities.Chapter:
+    properties:
+      course_id:
+        type: integer
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      lessons:
+        items:
+          $ref: '#/definitions/entities.Lesson'
+        type: array
+      name:
+        type: string
+      order:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  entities.Course:
+    properties:
+      chapters:
+        items:
+          $ref: '#/definitions/entities.Chapter'
+        type: array
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  entities.Lesson:
+    properties:
+      chapter_id:
+        type: integer
+      content:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      order:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  pkg.ErrorResponse:
+    properties:
+      error:
+        description: JSON ключ — "error", как у тебя и было
+        type: string
+    type: object
+host: localhost:3030
+info:
+  contact: {}
+  description: Это API для системы управления курсами
+  title: LMS API
+  version: "1.0"
+paths:
+  /api/chapters:
+    get:
+      description: Retrieves a list of all chapters
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.Chapter'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Get all chapters
+      tags:
+      - chapters
+    post:
+      consumes:
+      - application/json
+      description: Adds a new chapter to a specific course
+      parameters:
+      - description: Course ID
+        in: query
+        name: course_id
+        required: true
+        type: integer
+      - description: Chapter data
+        in: body
+        name: chapter
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Chapter'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entities.Chapter'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Create a new chapter
+      tags:
+      - chapters
+  /api/chapters/{chapter_id}:
+    delete:
+      description: Deletes a specific chapter by its ID
+      parameters:
+      - description: Chapter ID
+        in: path
+        name: chapter_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Delete a chapter
+      tags:
+      - chapters
+    get:
+      description: Retrieves a specific chapter by its ID
+      parameters:
+      - description: Chapter ID
+        in: path
+        name: chapter_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Chapter'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Get chapter by ID
+      tags:
+      - chapters
+  /api/chapters/{chapter_id}/lessons/reorder:
+    put:
+      consumes:
+      - application/json
+      description: Reorders the lessons in a chapter based on given list of IDs
+      parameters:
+      - description: Chapter ID
+        in: path
+        name: chapter_id
+        required: true
+        type: integer
+      - description: New lesson order
+        in: body
+        name: ids
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Reorder lessons
+      tags:
+      - lessons
+  /api/chapters/{chapter_id}/order:
+    put:
+      consumes:
+      - application/json
+      description: Updates the order field of a specific chapter
+      parameters:
+      - description: Chapter ID
+        in: path
+        name: chapter_id
+        required: true
+        type: integer
+      - description: New order value, e.g. {\
+        in: body
+        name: order
+        required: true
+        schema:
+          additionalProperties:
+            type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Update chapter order
+      tags:
+      - chapters
+  /api/courses:
+    get:
+      description: Retrieves a list of all courses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.Course'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Get all courses
+      tags:
+      - courses
+    post:
+      consumes:
+      - application/json
+      description: Adds a new course to the system
+      parameters:
+      - description: Course data
+        in: body
+        name: course
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Course'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entities.Course'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Create a new course
+      tags:
+      - courses
+  /api/courses/{course_id}:
+    delete:
+      description: Deletes a course by its ID
+      parameters:
+      - description: Course ID
+        in: path
+        name: course_id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Delete a course
+      tags:
+      - courses
+    get:
+      description: Retrieves details of a course by its ID
+      parameters:
+      - description: Course ID
+        in: path
+        name: course_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Course'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Get a course by ID
+      tags:
+      - courses
+    put:
+      consumes:
+      - application/json
+      description: Updates course details by ID
+      parameters:
+      - description: Course ID
+        in: path
+        name: course_id
+        required: true
+        type: integer
+      - description: Updated course
+        in: body
+        name: course
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Course'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Course'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Update a course
+      tags:
+      - courses
+  /api/lessons:
+    get:
+      description: Retrieves a list of all lessons
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.Lesson'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Get all lessons
+      tags:
+      - lessons
+    post:
+      consumes:
+      - application/json
+      description: Adds a new lesson to a specific chapter
+      parameters:
+      - description: Chapter ID
+        in: query
+        name: chapter_id
+        required: true
+        type: integer
+      - description: Lesson data
+        in: body
+        name: lesson
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Lesson'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entities.Lesson'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Create a new lesson
+      tags:
+      - lessons
+  /api/lessons/{lesson_id}:
+    delete:
+      description: Deletes a specific lesson by its ID
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Delete a lesson
+      tags:
+      - lessons
+    get:
+      description: Retrieves a specific lesson by its ID
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Lesson'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Get lesson by ID
+      tags:
+      - lessons
+    put:
+      consumes:
+      - application/json
+      description: Updates the content field of a specific lesson
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: lesson_id
+        required: true
+        type: integer
+      - description: 'New content. Example: {\'
+        in: body
+        name: content
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/pkg.ErrorResponse'
+      summary: Update lesson content
+      tags:
+      - lessons
+swagger: "2.0"

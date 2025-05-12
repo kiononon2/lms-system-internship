@@ -1,10 +1,19 @@
+// @title LMS API
+// @version 1.0
+// @description Это API для системы управления курсами
+// @host localhost:3030
+// @BasePath /api
+
 package main
 
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	_ "lms-system-internship/docs" // важно: импорт без использования
 	"lms-system-internship/entities"
 	"lms-system-internship/middleware"
 	"lms-system-internship/router"
@@ -35,6 +44,7 @@ func main() {
 	}()
 
 	r := gin.Default()
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Use(middleware.ErrorHandler())
 
 	router.SetupRoutes(db, r)

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"lms-system-internship/pkg"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,8 +24,8 @@ func ErrorHandler() gin.HandlerFunc {
 				status = http.StatusNotFound
 			}
 
-			c.JSON(status, gin.H{
-				"error": message,
+			c.JSON(status, pkg.ErrorResponse{
+				Message: message,
 			})
 		}
 	}
