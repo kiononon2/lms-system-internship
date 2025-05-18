@@ -1,8 +1,10 @@
 package middleware
 
 import (
-	"lms-system-internship/pkg"
+	"errors"
 	"net/http"
+
+	"lms-system-internship/pkg"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,17 +13,29 @@ func ErrorHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
 
-		// Check if any errors occurred during the request
 		if len(c.Errors) > 0 {
 			err := c.Errors.Last()
 
-			// You can customize error handling here based on error types or content
+			// Default error response
 			status := http.StatusInternalServerError
-			message := err.Error()
+			message := "Internal server error"
 
-			// Example: Check if it's a "not found" error message
-			if message == "course not found" || message == "chapter not found" || message == "lesson not found" {
+			// Handle specific error types
+			switch {
+			case errors.Is(err, pkg.ErrCourseNotFound),
+				errors.Is(err, pkg.ErrChapterNotFound),
+				errors.Is(err, pkg.ErrLessonNotFound):
 				status = http.StatusNotFound
+				message = err.Error()
+
+			case errors.Is(err, pkg.ErrInvalidInput):
+				status = http.StatusBadRequest
+				message = err.Error()
+
+			default:
+				// For unexpected errors, keep the internal server error status
+				// but log the detailed error for debugging
+				pkg.Logger.WithError(err).Error("Unexpected error occurred")
 			}
 
 			c.JSON(status, pkg.ErrorResponse{

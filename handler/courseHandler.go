@@ -112,6 +112,7 @@ func (h *CourseHandler) CreateCourse(c *gin.Context) {
 // @Failure      404        {object}  pkg.ErrorResponse
 // @Router       /api/courses/{course_id} [put]
 func (h *CourseHandler) UpdateCourse(c *gin.Context) {
+	// Get ID from URL
 	id, err := strconv.ParseUint(c.Param("course_id"), 10, 64)
 	if err != nil {
 		pkg.Logger.WithField("course_id", c.Param("course_id")).Error("Invalid course ID format")
@@ -119,19 +120,31 @@ func (h *CourseHandler) UpdateCourse(c *gin.Context) {
 		return
 	}
 
+	// Parse request body
 	var course entities.Course
 	if err2 := c.ShouldBindJSON(&course); err2 != nil {
-		pkg.Logger.WithError(err2).Error("Failed to bind JSON for course update")
+		pkg.Logger.WithError(err).Error("Failed to bind JSON for course update")
 		c.Error(pkg.ErrInvalidInput)
 		return
 	}
-	course.ID = uint(id)
 
-	if err3 := h.svc.UpdateCourseDetails(c.Request.Context(), &course); err3 != nil {
-		pkg.Logger.WithField("course_id", id).Error("Course update failed")
-		c.Error(pkg.ErrCourseNotFound)
+	// Verify ID consistency
+	if course.ID != uint(id) {
+		pkg.Logger.WithFields(map[string]interface{}{
+			"url_id":  id,
+			"body_id": course.ID,
+		}).Error("ID mismatch between URL and body")
+		c.Error(pkg.ErrInvalidInput)
 		return
 	}
+
+	// Call service
+	if err3 := h.svc.UpdateCourseDetails(c.Request.Context(), &course); err3 != nil {
+		pkg.Logger.WithField("course_id", id).Error("Course update failed")
+		c.Error(err3)
+		return
+	}
+
 	pkg.Logger.WithField("course_id", id).Info("Course updated successfully")
 	c.JSON(http.StatusOK, course)
 }
