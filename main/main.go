@@ -24,8 +24,8 @@ var db *gorm.DB
 
 func initDB() {
 	var err error
-	//db, err = gorm.Open(postgres.Open("user=postgres password=qwerty dbname=goDB host=db port=5432 sslmode=disable"), &gorm.Config{}) - for docker
-	db, err = gorm.Open(postgres.Open("user=ilia password=postgres dbname=postgres host=localhost port=5432 sslmode=disable"), &gorm.Config{})
+	db, err = gorm.Open(postgres.Open("user=postgres password=qwerty dbname=goDB host=db port=5432 sslmode=disable"), &gorm.Config{})
+	//db, err = gorm.Open(postgres.Open("user=ilia password=postgres dbname=postgres host=localhost port=5432 sslmode=disable"), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
