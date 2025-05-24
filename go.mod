@@ -3,7 +3,9 @@ module lms-system-internship
 go 1.23.8
 
 require (
+	github.com/MicahParks/keyfunc v1.9.0
 	github.com/gin-gonic/gin v1.10.0
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/files v1.0.1

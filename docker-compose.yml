@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    image: kiononon2/lms-app:latest
     container_name: go-app-container
     ports:
       - "3030:3030"
