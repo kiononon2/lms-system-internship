@@ -126,23 +126,23 @@ func SetupRoutes(db *gorm.DB, r *gin.Engine) {
 		// Chapters
 		chapters := protected.Group("/chapters")
 		{
-			chapters.POST("", middleware.RequireRoles("teacher"), chapterH.CreateChapter)
+			chapters.POST("", middleware.RequireRoles("admin", "teacher"), chapterH.CreateChapter)
 			chapters.GET("", chapterH.GetAllChapters)
 			chapters.GET("/:chapter_id", chapterH.GetChapter)
-			chapters.PUT("/:chapter_id", middleware.RequireRoles("teacher"), chapterH.UpdateChapterOrder)
+			chapters.PUT("/:chapter_id", middleware.RequireRoles("admin", "teacher"), chapterH.UpdateChapterOrder)
 			chapters.DELETE("/:chapter_id", middleware.RequireRoles("admin"), chapterH.DeleteChapter)
 		}
 
 		// Lessons
 		lessons := protected.Group("/lessons")
 		{
-			lessons.POST("", middleware.RequireRoles("teacher"), lessonH.CreateLesson)
+			lessons.POST("", middleware.RequireRoles("admin", "teacher"), lessonH.CreateLesson)
 			lessons.GET("", lessonH.GetAllLessons)
 			lessons.GET("/:lesson_id", lessonH.GetLesson)
-			lessons.PUT("/:lesson_id", middleware.RequireRoles("teacher"), lessonH.UpdateLessonContent)
+			lessons.PUT("/:lesson_id", middleware.RequireRoles("admin", "teacher"), lessonH.UpdateLessonContent)
 			lessons.DELETE("/:lesson_id", middleware.RequireRoles("admin"), lessonH.DeleteLesson)
 		}
 
-		protected.PUT("/chapters/:chapter_id/lessons/reorder", middleware.RequireRoles("teacher"), lessonH.ReorderLessons)
+		protected.PUT("/chapters/:chapter_id/lessons/reorder", middleware.RequireRoles("admin", "teacher"), lessonH.ReorderLessons)
 	}
 }
