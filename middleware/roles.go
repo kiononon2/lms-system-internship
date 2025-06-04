@@ -24,6 +24,7 @@ func RequireRoles(requiredRoles ...string) gin.HandlerFunc {
 		for _, required := range requiredRoles {
 			for _, userRole := range userRoles {
 				if userRole == required {
+					print(userRole) //---------
 					c.Next()
 					return
 				}
