@@ -119,6 +119,7 @@ func SetupRoutes(db *gorm.DB, r *gin.Engine) {
 			c.JSON(http.StatusOK, gin.H{"status": "ok"})
 		})
 		api.POST("/auth/login", handler.LoginHandler)
+		api.POST("/auth/refresh", handler.RefreshTokenHandler)
 
 		// Защищённая группа (требует JWT)
 		protected := api.Group("")

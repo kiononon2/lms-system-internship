@@ -32,25 +32,22 @@ func TokenAuthMiddleware(jwks *keyfunc.JWKS) gin.HandlerFunc {
 			return
 		}
 
-		// Извлекаем имя пользователя
-		username, _ := claims["preferred_username"].(string)
-		c.Set("username", username)
+		if username, ok := claims["preferred_username"].(string); ok {
+			c.Set("username", username)
+		}
 
-		// Извлекаем роли из resource_access
 		roles := []string{}
-		if resourceAccess, ok := claims["resource_access"].(map[string]interface{}); ok {
-			if clientAccess, ok := resourceAccess["lms-app"].(map[string]interface{}); ok {
-				if rolesRaw, ok := clientAccess["roles"].([]interface{}); ok {
-					for _, role := range rolesRaw {
-						if roleStr, ok := role.(string); ok {
-							roles = append(roles, roleStr)
-						}
+		if realmAccess, ok := claims["realm_access"].(map[string]interface{}); ok {
+			if rolesRaw, ok := realmAccess["roles"].([]interface{}); ok {
+				for _, role := range rolesRaw {
+					if roleStr, ok := role.(string); ok {
+						roles = append(roles, roleStr)
 					}
 				}
 			}
 		}
-		c.Set("roles", roles)
 
+		c.Set("roles", roles)
 		c.Next()
 	}
 }
