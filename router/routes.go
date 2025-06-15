@@ -157,5 +157,7 @@ func SetupRoutes(db *gorm.DB, r *gin.Engine) {
 		}
 
 		protected.PUT("/chapters/:chapter_id/lessons/reorder", middleware.RequireRoles("ROLE_ADMIN", "ROLE_TEACHER"), lessonH.ReorderLessons)
+
+		protected.POST("/admin/register", middleware.RequireRoles("ROLE_ADMIN"), handler.RegisterUser)
 	}
 }

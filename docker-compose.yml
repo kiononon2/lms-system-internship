@@ -6,6 +6,8 @@ services:
     container_name: go-app-container
     ports:
       - "3030:3030"
+    env_file:
+      - .env
     environment:
       - DB_HOST=db
       - DB_PORT=5432
