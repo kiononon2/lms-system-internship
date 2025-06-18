@@ -108,8 +108,15 @@ func SetupRoutes(db *gorm.DB, r *gin.Engine) {
 			attachments.GET("/download/:attachment_id", attachmentH.DownloadFile)
 		}
 
+		admin := protected.Group("/admin", middleware.RequireRoles("ROLE_ADMIN"))
+		{
+			admin.POST("/update-roles", handler.UpdateUserRolesHandler)
+			admin.POST("register", handler.RegisterUser)
+		}
 		protected.PUT("/chapters/:chapter_id/lessons/reorder", middleware.RequireRoles("ROLE_ADMIN"), lessonH.ReorderLessons)
 
-		protected.POST("/admin/register", middleware.RequireRoles("ROLE_ADMIN"), handler.RegisterUser)
+		//protected.POST("/user/register", middleware.RequireRoles("ROLE_ADMIN"), handler.RegisterUser)
+		protected.PUT("/user/profile", handler.UpdateUserProfile)
+
 	}
 }

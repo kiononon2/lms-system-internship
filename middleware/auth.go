@@ -35,6 +35,9 @@ func TokenAuthMiddleware(jwks *keyfunc.JWKS) gin.HandlerFunc {
 		if username, ok := claims["preferred_username"].(string); ok {
 			c.Set("username", username)
 		}
+		if sub, ok := claims["sub"].(string); ok {
+			c.Set("user_id", sub)
+		}
 
 		roles := []string{}
 		if realmAccess, ok := claims["realm_access"].(map[string]interface{}); ok {
