@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/google/uuid"
 	"lms-system-internship/entities"
 	"lms-system-internship/pkg"
 	"lms-system-internship/service"
@@ -205,4 +206,34 @@ func (h *LessonHandler) DeleteLesson(c *gin.Context) {
 	}
 	pkg.Logger.WithField("lesson_id", id).Info("Lesson deleted successfully")
 	c.Status(http.StatusNoContent)
+}
+
+func (h *LessonHandler) GrantLessonAccess(c *gin.Context) {
+	var body struct {
+		UserID   string `json:"user_id"`
+		LessonID uint   `json:"lesson_id"`
+	}
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
+		return
+	}
+
+	userUUID, err := uuid.Parse(body.UserID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id UUID"})
+		return
+	}
+
+	if body.LessonID == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "lesson_id is required"})
+		return
+	}
+
+	if err := h.svc.GrantAccess(c.Request.Context(), userUUID, body.LessonID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to grant access"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "access granted"})
 }

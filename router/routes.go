@@ -100,6 +100,7 @@ func SetupRoutes(db *gorm.DB, r *gin.Engine) {
 			lessons.GET("/:lesson_id", lessonH.GetLesson)
 			lessons.PUT("/:lesson_id", middleware.RequireRoles("ROLE_ADMIN"), lessonH.UpdateLessonContent)
 			lessons.DELETE("/:lesson_id", middleware.RequireRoles("ROLE_ADMIN"), lessonH.DeleteLesson)
+			lessons.POST("/grant-access", lessonH.GrantLessonAccess)
 		}
 
 		attachments := protected.Group("/attachments")

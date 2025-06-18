@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"github.com/google/uuid"
 	"net/http"
 	"strings"
 
@@ -36,9 +37,11 @@ func TokenAuthMiddleware(jwks *keyfunc.JWKS) gin.HandlerFunc {
 			c.Set("username", username)
 		}
 		if sub, ok := claims["sub"].(string); ok {
-			c.Set("user_id", sub)
+			id, err := uuid.Parse(sub)
+			if err == nil {
+				c.Set("userID", id)
+			}
 		}
-
 		roles := []string{}
 		if realmAccess, ok := claims["realm_access"].(map[string]interface{}); ok {
 			if rolesRaw, ok := realmAccess["roles"].([]interface{}); ok {

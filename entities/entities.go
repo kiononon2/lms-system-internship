@@ -1,6 +1,9 @@
 package entities
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type Course struct {
 	ID          uint      `gorm:"primaryKey" json:"id"`
@@ -40,5 +43,11 @@ type Attachment struct {
 	Name      string `gorm:"type:varchar(255);not null"`
 	URL       string `gorm:"type:varchar(255);not null"`
 	LessonID  uint   `gorm:"not null"`
+	CreatedAt time.Time
+}
+
+type LessonUser struct {
+	LessonID  uint      `gorm:"primaryKey"`
+	UserID    uuid.UUID `gorm:"type:uuid;primaryKey"`
 	CreatedAt time.Time
 }

@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"github.com/google/uuid"
 	"io"
+	"lms-system-internship/pkg"
 	"net/http"
 	"strconv"
 
@@ -49,19 +51,32 @@ func (h *AttachmentHandler) UploadFile(c *gin.Context) {
 }
 
 func (h *AttachmentHandler) DownloadFile(c *gin.Context) {
-	idStr := c.Param("attachment_id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	attachmentIDParam := c.Param("attachment_id")
+	attachmentID, err := strconv.ParseUint(attachmentIDParam, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid attachment_id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid attachment ID"})
 		return
 	}
 
-	data, filename, err := h.service.DownloadFile(c.Request.Context(), uint(id))
+	userIDValue, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized: userID not found"})
+		return
+	}
+	userID, ok := userIDValue.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid userID format"})
+		return
+	}
+	pkg.Logger.Debugf("userID (parsed from context):", userID)
+	// Скачиваем файл
+	data, fileName, err := h.service.DownloadFile(c.Request.Context(), userID, uint(attachmentID))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.Header("Content-Disposition", "attachment; filename=\""+filename+"\"")
+	// Отправляем файл
+	c.Header("Content-Disposition", "attachment; filename=\""+fileName+"\"")
 	c.Data(http.StatusOK, "application/octet-stream", data)
 }

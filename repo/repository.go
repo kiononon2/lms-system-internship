@@ -13,6 +13,7 @@ func NewRepository(db *gorm.DB) *Repository {
 		Chapter:    &chapterRepository{db: db},
 		Lesson:     &lessonRepository{db: db},
 		Attachment: &attachmentRepo{db: db},
+		LessonUser: &lessonUserRepository{db: db},
 	}
 }
 

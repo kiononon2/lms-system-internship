@@ -41,4 +41,5 @@ type Repository struct {
 	Chapter    ChapterRepository
 	Lesson     LessonRepository
 	Attachment AttachmentRepository
+	LessonUser LessonUserRepository
 }

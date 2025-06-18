@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"lms-system-internship/entities"
 )
 
@@ -28,6 +29,7 @@ type LessonService interface {
 	UpdateLessonContent(ctx context.Context, lessonID uint, content string) error
 	ReorderLessons(ctx context.Context, chapterID uint, orderedLessonIDs []uint) error
 	DeleteLesson(ctx context.Context, lessonID uint) error
+	GrantAccess(ctx context.Context, userID uuid.UUID, lessonID uint) error
 }
 
 type Service struct {

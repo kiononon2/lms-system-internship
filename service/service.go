@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"github.com/google/uuid"
 	"lms-system-internship/entities"
 	"lms-system-internship/files"
 	"lms-system-internship/repo"
@@ -11,8 +13,8 @@ func NewService(repo *repo.Repository, fs files.FileStorage) *Service {
 	return &Service{
 		CourseService:     NewCourseService(repo.Course),
 		ChapterService:    NewChapterService(repo.Chapter),
-		LessonService:     NewLessonService(repo.Lesson),
-		AttachmentService: NewAttachmentService(repo.Attachment, repo.Lesson, fs), // 👈 добавили
+		LessonService:     NewLessonService(repo.Lesson, repo.LessonUser),
+		AttachmentService: NewAttachmentService(repo.Attachment, repo.Lesson, repo.LessonUser, fs), // 👈 добавили
 	}
 }
 
@@ -82,11 +84,15 @@ func (s *chapterService) RemoveChapter(ctx context.Context, chapterID uint) erro
 
 // Lesson Service Implementation
 type lessonService struct {
-	repo repo.LessonRepository
+	repo           repo.LessonRepository
+	lessonUserRepo repo.LessonUserRepository
 }
 
-func NewLessonService(repo repo.LessonRepository) LessonService {
-	return &lessonService{repo: repo}
+func NewLessonService(repo repo.LessonRepository, lessonUserRepo repo.LessonUserRepository) LessonService {
+	return &lessonService{
+		repo:           repo,
+		lessonUserRepo: lessonUserRepo,
+	}
 }
 
 func (s *lessonService) GetAllLessons(ctx context.Context) ([]*entities.Lesson, error) {
@@ -137,4 +143,14 @@ func (s *lessonService) ReorderLessons(ctx context.Context, chapterID uint, orde
 
 func (s *lessonService) DeleteLesson(ctx context.Context, lessonID uint) error {
 	return s.repo.Delete(ctx, lessonID)
+}
+
+func (s *lessonService) GrantAccess(ctx context.Context, userID uuid.UUID, lessonID uint) error {
+	// можно добавить проверку, существует ли Lesson
+	_, err := s.repo.FindByID(ctx, lessonID)
+	if err != nil {
+		return fmt.Errorf("lesson not found: %w", err)
+	}
+
+	return s.lessonUserRepo.GrantAccess(userID, lessonID)
 }
