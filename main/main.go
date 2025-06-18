@@ -29,7 +29,7 @@ func initDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = db.AutoMigrate(&entities.Course{}, &entities.Chapter{}, &entities.Lesson{})
+	err = db.AutoMigrate(&entities.Course{}, &entities.Chapter{}, &entities.Lesson{}, &entities.Attachment{})
 
 }
 

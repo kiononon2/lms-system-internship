@@ -31,7 +31,8 @@ type LessonService interface {
 }
 
 type Service struct {
-	CourseService  CourseService
-	ChapterService ChapterService
-	LessonService  LessonService
+	CourseService     CourseService
+	ChapterService    ChapterService
+	LessonService     LessonService
+	AttachmentService AttachmentService
 }

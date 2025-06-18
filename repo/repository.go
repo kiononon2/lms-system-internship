@@ -9,9 +9,10 @@ import (
 
 func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{
-		Course:  &courseRepository{db: db},
-		Chapter: &chapterRepository{db: db},
-		Lesson:  &lessonRepository{db: db},
+		Course:     &courseRepository{db: db},
+		Chapter:    &chapterRepository{db: db},
+		Lesson:     &lessonRepository{db: db},
+		Attachment: &attachmentRepo{db: db},
 	}
 }
 

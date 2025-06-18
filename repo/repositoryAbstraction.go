@@ -37,7 +37,8 @@ type LessonRepository interface {
 }
 
 type Repository struct {
-	Course  CourseRepository
-	Chapter ChapterRepository
-	Lesson  LessonRepository
+	Course     CourseRepository
+	Chapter    ChapterRepository
+	Lesson     LessonRepository
+	Attachment AttachmentRepository
 }

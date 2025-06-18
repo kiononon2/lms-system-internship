@@ -2,11 +2,14 @@ package router
 
 import (
 	"fmt"
+	"lms-system-internship/files"
 	"lms-system-internship/handler"
 	"lms-system-internship/middleware"
 	"lms-system-internship/repo"
 	"lms-system-internship/service"
+	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/MicahParks/keyfunc"
@@ -38,11 +41,23 @@ func SetupRoutes(db *gorm.DB, r *gin.Engine) {
 	}
 
 	repository := repo.NewRepository(db)
-	svc := service.NewService(repository)
+
+	minioStorage, err := files.NewMinIOStorage(
+		os.Getenv("MINIO_ENDPOINT"),
+		os.Getenv("MINIO_ACCESS_KEY"),
+		os.Getenv("MINIO_SECRET_KEY"),
+		os.Getenv("MINIO_BUCKET"),
+	)
+	if err != nil {
+		log.Fatalf("failed to init MinioStorage: %v", err)
+	}
+
+	svc := service.NewService(repository, minioStorage)
 
 	courseH := handler.NewCourseHandler(svc.CourseService)
 	chapterH := handler.NewChapterHandler(svc.ChapterService)
 	lessonH := handler.NewLessonHandler(svc.LessonService)
+	attachmentH := handler.NewAttachmentHandler(svc.AttachmentService)
 
 	api := r.Group("/api")
 	{
@@ -85,6 +100,12 @@ func SetupRoutes(db *gorm.DB, r *gin.Engine) {
 			lessons.GET("/:lesson_id", lessonH.GetLesson)
 			lessons.PUT("/:lesson_id", middleware.RequireRoles("ROLE_ADMIN"), lessonH.UpdateLessonContent)
 			lessons.DELETE("/:lesson_id", middleware.RequireRoles("ROLE_ADMIN"), lessonH.DeleteLesson)
+		}
+
+		attachments := protected.Group("/attachments")
+		{
+			attachments.POST("/upload", middleware.RequireRoles("ROLE_ADMIN", "ROLE_TEACHER"), attachmentH.UploadFile)
+			attachments.GET("/download/:attachment_id", attachmentH.DownloadFile)
 		}
 
 		protected.PUT("/chapters/:chapter_id/lessons/reorder", middleware.RequireRoles("ROLE_ADMIN"), lessonH.ReorderLessons)

@@ -3,14 +3,16 @@ package service
 import (
 	"context"
 	"lms-system-internship/entities"
+	"lms-system-internship/files"
 	"lms-system-internship/repo"
 )
 
-func NewService(repo *repo.Repository) *Service {
+func NewService(repo *repo.Repository, fs files.FileStorage) *Service {
 	return &Service{
-		CourseService:  NewCourseService(repo.Course),
-		ChapterService: NewChapterService(repo.Chapter),
-		LessonService:  NewLessonService(repo.Lesson),
+		CourseService:     NewCourseService(repo.Course),
+		ChapterService:    NewChapterService(repo.Chapter),
+		LessonService:     NewLessonService(repo.Lesson),
+		AttachmentService: NewAttachmentService(repo.Attachment, repo.Lesson, fs), // 👈 добавили
 	}
 }
 

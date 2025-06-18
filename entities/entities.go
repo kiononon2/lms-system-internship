@@ -34,3 +34,11 @@ type Lesson struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
+
+type Attachment struct {
+	ID        uint   `gorm:"primaryKey"`
+	Name      string `gorm:"type:varchar(255);not null"`
+	URL       string `gorm:"type:varchar(255);not null"`
+	LessonID  uint   `gorm:"not null"`
+	CreatedAt time.Time
+}
