@@ -1,5 +1,18 @@
 basePath: /api
 definitions:
+  entities.Attachment:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      lessonID:
+        type: integer
+      name:
+        type: string
+      url:
+        type: string
+    type: object
   entities.Chapter:
     properties:
       course_id:
@@ -57,6 +70,84 @@ definitions:
       updated_at:
         type: string
     type: object
+  handler.GrantLessonAccessRequest:
+    properties:
+      lesson_id:
+        type: integer
+      user_id:
+        type: string
+    type: object
+  handler.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  handler.RefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  handler.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+      username:
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  handler.TokenResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      token_type:
+        type: string
+    type: object
+  handler.UpdateLessonContentRequest:
+    properties:
+      content:
+        type: string
+    type: object
+  handler.UpdateUserRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    type: object
+  handler.UpdateUserRolesRequest:
+    properties:
+      new_roles:
+        description: Роли, которые нужно оставить
+        items:
+          type: string
+        type: array
+      user_id:
+        type: string
+    required:
+    - new_roles
+    - user_id
+    type: object
   pkg.ErrorResponse:
     properties:
       error:
@@ -70,6 +161,80 @@ info:
   title: LMS API
   version: "1.0"
 paths:
+  /api/admin/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user in Keycloak with optional roles
+      parameters:
+      - description: User registration data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
+  /api/admin/update-roles:
+    post:
+      consumes:
+      - application/json
+      description: Replaces a user's roles in Keycloak with the given list
+      parameters:
+      - description: User role update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UpdateUserRolesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user roles (admin only)
+      tags:
+      - admin
   /api/chapters:
     get:
       description: Retrieves a list of all chapters
@@ -489,14 +654,12 @@ paths:
         name: lesson_id
         required: true
         type: integer
-      - description: 'New content. Example: {\'
+      - description: New content
         in: body
         name: content
         required: true
         schema:
-          additionalProperties:
-            type: string
-          type: object
+          $ref: '#/definitions/handler.UpdateLessonContentRequest'
       produces:
       - application/json
       responses:
@@ -513,4 +676,257 @@ paths:
       summary: Update lesson content
       tags:
       - lessons
+  /api/lessons/grant-access:
+    post:
+      consumes:
+      - application/json
+      description: Предоставляет пользователю доступ к конкретному уроку
+      parameters:
+      - description: Данные доступа
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.GrantLessonAccessRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Назначить доступ к уроку
+      tags:
+      - lessons
+  /api/user/profile:
+    put:
+      consumes:
+      - application/json
+      description: Allows the authenticated user to update their email, name, and
+        password
+      parameters:
+      - description: User update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update current user's profile
+      tags:
+      - user
+  /attachments/download/{attachment_id}:
+    get:
+      description: Отправляет файл, если у пользователя есть доступ к уроку
+      parameters:
+      - description: ID вложения
+        in: path
+        name: attachment_id
+        required: true
+        type: integer
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Скачивание файла по ID вложения
+      tags:
+      - attachments
+  /attachments/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загружает файл и прикрепляет его к уроку по lesson_id
+      parameters:
+      - description: ID урока
+        in: formData
+        name: lesson_id
+        required: true
+        type: integer
+      - description: Файл для загрузки
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entities.Attachment'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Загрузка файла к уроку
+      tags:
+      - attachments
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Получить JWT токены по имени пользователя и паролю
+      parameters:
+      - description: Данные для входа
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/handler.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Аутентификация пользователя
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Получить новые access и refresh токены по refresh_token
+      parameters:
+      - description: Refresh токен
+        in: body
+        name: refresh
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновление токена
+      tags:
+      - auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

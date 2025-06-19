@@ -11,6 +11,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type UpdateLessonContentRequest struct {
+	Content string `json:"content"`
+}
+
+type GrantLessonAccessRequest struct {
+	UserID   string `json:"user_id"`
+	LessonID uint   `json:"lesson_id"`
+}
+
 type LessonHandler struct {
 	svc service.LessonService
 }
@@ -112,7 +121,7 @@ func (h *LessonHandler) CreateLesson(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        lesson_id  path  int                      true  "Lesson ID"
-// @Param        content    body  map[string]string        true  "New content. Example: {\"content\": \"Updated text\"}"
+// @Param        content    body  handler.UpdateLessonContentRequest  true  "New content"
 // @Success      200
 // @Failure      400  {object}  pkg.ErrorResponse
 // @Failure      404  {object}  pkg.ErrorResponse
@@ -125,9 +134,8 @@ func (h *LessonHandler) UpdateLessonContent(c *gin.Context) {
 		return
 	}
 
-	var payload struct {
-		Content string `json:"content"`
-	}
+	var payload UpdateLessonContentRequest
+
 	if err2 := c.ShouldBindJSON(&payload); err2 != nil {
 		pkg.Logger.Error("Invalid JSON input while updating lesson content")
 		c.Error(pkg.ErrInvalidInput)
@@ -208,11 +216,20 @@ func (h *LessonHandler) DeleteLesson(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// GrantLessonAccess godoc
+// @Summary      Назначить доступ к уроку
+// @Description  Предоставляет пользователю доступ к конкретному уроку
+// @Tags         lessons
+// @Accept       json
+// @Produce      json
+// @Param        body  body  handler.GrantLessonAccessRequest  true  "Данные доступа"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /api/lessons/grant-access [post]
 func (h *LessonHandler) GrantLessonAccess(c *gin.Context) {
-	var body struct {
-		UserID   string `json:"user_id"`
-		LessonID uint   `json:"lesson_id"`
-	}
+	var body GrantLessonAccessRequest
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})

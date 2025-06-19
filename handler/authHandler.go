@@ -30,6 +30,18 @@ type RefreshRequest struct {
 
 //
 
+// LoginHandler godoc
+// @Summary Аутентификация пользователя
+// @Description Получить JWT токены по имени пользователя и паролю
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param login body LoginRequest true "Данные для входа"
+// @Success 200 {object} TokenResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /auth/login [post]
 func LoginHandler(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -74,6 +86,18 @@ func LoginHandler(c *gin.Context) {
 
 //
 
+// RefreshTokenHandler godoc
+// @Summary Обновление токена
+// @Description Получить новые access и refresh токены по refresh_token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param refresh body RefreshRequest true "Refresh токен"
+// @Success 200 {object} TokenResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /auth/refresh [post]
 func RefreshTokenHandler(c *gin.Context) {
 	var req RefreshRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

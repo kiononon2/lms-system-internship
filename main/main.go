@@ -3,6 +3,9 @@
 // @description Это API для системы управления курсами
 // @host localhost:3030
 // @BasePath /api
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 
 package main
 

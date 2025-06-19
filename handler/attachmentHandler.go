@@ -20,6 +20,19 @@ func NewAttachmentHandler(s service.AttachmentService) *AttachmentHandler {
 	return &AttachmentHandler{service: s}
 }
 
+// UploadFile godoc
+// @Summary Загрузка файла к уроку
+// @Description Загружает файл и прикрепляет его к уроку по lesson_id
+// @Tags attachments
+// @Accept multipart/form-data
+// @Produce json
+// @Param lesson_id formData int true "ID урока"
+// @Param file formData file true "Файл для загрузки"
+// @Success 201 {object} entities.Attachment
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Router /attachments/upload [post]
 func (h *AttachmentHandler) UploadFile(c *gin.Context) {
 	lessonIDStr := c.PostForm("lesson_id")
 	lessonID, err := strconv.ParseUint(lessonIDStr, 10, 64)
@@ -50,6 +63,18 @@ func (h *AttachmentHandler) UploadFile(c *gin.Context) {
 	c.JSON(http.StatusCreated, attachment)
 }
 
+// DownloadFile godoc
+// @Summary Скачивание файла по ID вложения
+// @Description Отправляет файл, если у пользователя есть доступ к уроку
+// @Tags attachments
+// @Produce application/octet-stream
+// @Param attachment_id path int true "ID вложения"
+// @Success 200 {file} file
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Security BearerAuth
+// @Router /attachments/download/{attachment_id} [get]
 func (h *AttachmentHandler) DownloadFile(c *gin.Context) {
 	attachmentIDParam := c.Param("attachment_id")
 	attachmentID, err := strconv.ParseUint(attachmentIDParam, 10, 64)
